@@ -119,7 +119,7 @@ export default function App() {
             const cache = data.slice(0, 10).map(t => ({
               h: t.tripHeadsign,
               epoch: t.predictedArrivalTime || t.scheduledArrivalTime,
-              l: t.routeShortName || "1"
+              l: (t.routeShortName && t.routeShortName.includes('2')) ? '2' : '1'
             }));
 
             NativeModules.WidgetModule.updateWidget(
@@ -163,7 +163,7 @@ export default function App() {
             const cache = data.slice(0, 10).map(t => ({
               h: t.tripHeadsign,
               epoch: t.predictedArrivalTime || t.scheduledArrivalTime,
-              l: t.routeShortName || "1"
+              l: (t.routeShortName && t.routeShortName.includes('2')) ? '2' : '1'
             }));
 
             NativeModules.WidgetModule.updateWidget(
@@ -225,6 +225,9 @@ export default function App() {
     const time = arrival.predictedArrivalTime || arrival.scheduledArrivalTime;
     const currentTime = Date.now() + serverTimeOffset;
     const diffMin = Math.floor((time - currentTime) / 60000);
+    
+    if (diffMin < -1) return null; // Hide trains more than 1 minute past departure
+    
     const diff = Math.max(0, diffMin); // Prevent negative numbers
     const isNow = diff <= 1;
     const uniqueKey = `${arrival.tripId || index}-${arrival.stopId}`;
